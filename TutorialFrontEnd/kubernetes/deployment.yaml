@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: tutorial-frontend
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: tutorial-frontend
+
+  template:
+    metadata:
+      labels:
+        app: tutorial-frontend
+
+    spec:
+      containers:
+        - name: tutorial-frontend
+
+          image: amirdocker2204/tutorial-frontend:1.0.0
+
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 80
