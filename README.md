@@ -1,6 +1,8 @@
-Tutorial Service
+**Tutorial Service**
+
 This is tutorial backend service written in Spring Boot Java.
 
-Tutorial UI
+**Tutorial UI**
+
 This is tutorial frontend ui written in Angular.
 
