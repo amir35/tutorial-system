@@ -10,6 +10,9 @@ spec:
     git:
       uri: https://github.com/amir35/tutorial-system.git
       ref: feature/openshift
+
+    contextDir: tutorial-service
+
     type: Git
 
   strategy:
