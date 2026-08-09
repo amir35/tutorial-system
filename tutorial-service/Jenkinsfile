@@ -30,7 +30,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main',
+                git branch: 'feature/jenkins',
                     url: 'https://github.com/amir35/tutorial-system.git'
             }
         }
