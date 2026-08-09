@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: tutorial-service-config
+
+data:
+  APP_NAME: "Tutorial Application Backend From ConfigMap"
+  LOG_LEVEL: "INFO"
+  DB_URL: jdbc:oracle:thin:@166.87.253.57:1521/orcl

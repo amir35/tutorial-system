@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: tutorial-ui
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: tutorial-ui
+
+  template:
+    metadata:
+      labels:
+        app: tutorial-ui
+
+    spec:
+      containers:
+        - name: tutorial-ui
+
+          image: amirdocker2204/tutorial-ui:v2
+
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 80

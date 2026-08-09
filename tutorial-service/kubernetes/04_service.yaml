@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: tutorial-service
+
+spec:
+  #Service will be accessible only inside the cluster using put-forward tunnel
+  #type: ClusterIP
+  #Service will be accessible outside the cluster using NodePort
+  type: NodePort
+
+  selector:
+    #Service will forward traffic to Pods with this label only
+    app: tutorial-service
+
+  ports:
+    #Service will forward traffic from port 8080 to port 8080 of the Pod
+    - port: 8080
+
+      #Port of the Pod to which traffic will be forwarded
+      targetPort: 8080
+      nodePort: 30080
