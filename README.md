@@ -93,3 +93,9 @@ kubectl get ingress
 **Update Host File**
 C:\Windows\System32\drivers\etc\hosts
 Add '127.0.0.1 tutorial.local'
+
+
+**Branch : feature/jenkins**
+Create Jenkinsfile in the root folder of the project.
+Create New pipeline for tutorial-service and tutorial-ui in Jenkins and configure the pipeline with the Jenkinsfile.
+Add webhook in git->repo->setting to trigger the pipeline when code is push
