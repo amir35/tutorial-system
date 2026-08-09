@@ -1,0 +1,26 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+
+metadata:
+  name: tutorial-service
+
+spec:
+
+  source:
+    git:
+      uri: https://github.com/amir35/tutorial-system.git
+      ref: feature/openshift
+    type: Git
+
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+
+  output:
+    to:
+      kind: ImageStreamTag
+      name: tutorial-service:latest
+
+  triggers:
+    - type: ConfigChange

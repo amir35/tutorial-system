@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tutorial-service
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: tutorial-service
+
+  template:
+    metadata:
+      labels:
+        app: tutorial-service
+
+    spec:
+      containers:
+        - name: tutorial-service
+
+          image: image-registry.openshift-image-registry.svc:5000/amirahmad2204-dev/tutorial-service:latest
+
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: tutorial-config
+                  key: DB_URL
+
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: tutorial-secret
+                  key: DB_USERNAME
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tutorial-secret
+                  key: DB_PASSWORD
+
+          volumeMounts:
+            - name: tutorial-workspace
+              mountPath: /workspace
+
+      volumes:
+          - name: tutorial-workspace
+            persistentVolumeClaim:
+              claimName: tutorial-system-pvc

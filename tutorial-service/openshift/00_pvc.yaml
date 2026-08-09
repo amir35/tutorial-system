@@ -1,0 +1,13 @@
+apiVersion: v1                     # To tell Kubernetes/Openshift that this is core API resource
+kind: PersistentVolumeClaim        # Request persistent storage
+
+metadata:
+  name: tutorial-system-pvc     # resource name, afterwards Task will use this name to mount the Workspace
+
+spec:
+  accessModes:
+    - ReadWriteOnce                # One node can mount as Read/Write
+
+  resources:
+    requests:
+      storage: 1Gi                 # Requested storage size
