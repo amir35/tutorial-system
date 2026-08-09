@@ -1,0 +1,117 @@
+pipeline {
+
+  agent any
+
+  parameters {
+
+    booleanParam(
+      name: 'DEPLOY',
+      defaultValue: true,
+      description: 'Deploy UI to Kubernetes?'
+    )
+
+    string(
+      name: 'DOCKER_TAG',
+      defaultValue: '',
+      description: 'Leave empty to use BUILD_NUMBER'
+    )
+  }
+
+  environment {
+    IMAGE_NAME = 'amirdocker2204/tutorial-ui'
+    IMAGE_TAG = "${params.DOCKER_TAG ?: BUILD_NUMBER}"
+  }
+
+  stages {
+
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Print Variables') {
+      steps {
+        script {
+          echo "DEPLOY     : ${params.DEPLOY}"
+          echo "DOCKER_TAG : ${IMAGE_TAG}"
+          echo "IMAGE_NAME : ${IMAGE_NAME}"
+        }
+      }
+    }
+
+    stage('Docker Build') {
+      steps {
+        dir('tutorial-ui') {
+          sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+        }
+      }
+    }
+
+    stage('Docker Login') {
+      steps {
+        withCredentials([
+          usernamePassword(
+            credentialsId: 'dockerhub-creds',
+            usernameVariable: 'DOCKER_USER',
+            passwordVariable: 'DOCKER_PASS'
+          )
+        ]) {
+          sh '''
+                        echo "$DOCKER_PASS" | docker login \
+                        -u "$DOCKER_USER" \
+                        --password-stdin
+                    '''
+        }
+      }
+    }
+
+    stage('Docker Push') {
+      steps {
+        sh 'docker push $IMAGE_NAME:$IMAGE_TAG'
+      }
+    }
+
+    stage('Deploy to Kubernetes') {
+
+      when {
+        expression {
+          params.DEPLOY
+        }
+      }
+
+      steps {
+
+        withCredentials([
+          file(
+            credentialsId: 'kubeconfig',
+            variable: 'KUBECONFIG'
+          )
+        ]) {
+
+          sh '''
+                        kubectl set image deployment/tutorial-ui \
+                        tutorial-ui=$IMAGE_NAME:$IMAGE_TAG
+
+                        kubectl rollout status deployment/tutorial-ui
+                    '''
+        }
+      }
+    }
+  }
+
+  post {
+
+    success {
+      echo 'UI Pipeline Completed Successfully'
+    }
+
+    failure {
+      echo 'UI Pipeline Failed'
+    }
+
+    always {
+      cleanWs()
+    }
+  }
+}
