@@ -7,4 +7,4 @@ metadata:
 data:
   APP_NAME: "Tutorial Application Backend From ConfigMap"
   LOG_LEVEL: "INFO"
-  DB_URL: jdbc:oracle:thin:@166.87.253.57:1521/orcl
+  DB_URL: jdbc:oracle:thin:@166.87.223.49:1521/orcl
