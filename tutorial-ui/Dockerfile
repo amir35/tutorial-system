@@ -9,7 +9,7 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
+RUN npm run build -- --no-progress
 
 # Runtime Stage
 FROM nginx:alpine
