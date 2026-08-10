@@ -20,7 +20,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(
+        origins = {
+                "http://localhost:4200",
+                "https://tutorial-ui-amirahmad2204-dev.apps.rm3.7wse.p1.openshiftapps.com"
+        }
+)
 @RestController
 @RequestMapping("/api")
 public class TutorialController {
