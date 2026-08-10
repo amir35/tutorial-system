@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tutorial-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tutorial-ui
+  template:
+    metadata:
+      labels:
+        app: tutorial-ui
+    spec:
+      containers:
+        - name: tutorial-ui
+          image: image-registry.openshift-image-registry.svc:5000/amirahmad2204-dev/tutorial-ui:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080

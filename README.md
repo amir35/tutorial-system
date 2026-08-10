@@ -56,3 +56,11 @@ oc get imagestream
 
 oc apply -f 02_buildconfig.yaml
 oc get buildconfig
+
+oc start-build tutorial-ui --follow
+
+oc get imagestream
+
+oc apply -f 03_deployment.yaml
+oc get deployment
+oc get pods
