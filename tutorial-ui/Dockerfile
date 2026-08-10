@@ -1,3 +1,4 @@
+# Build Stage
 FROM node:22 AS builder
 
 WORKDIR /app
@@ -10,10 +11,11 @@ COPY . .
 
 RUN npm run build
 
+# Runtime Stage
 FROM nginx:alpine
 
-COPY --from=builder /app/dist/tutorial-ui/ /usr/share/nginx/html
+COPY --from=builder /app/dist/tutorial-ui/browser/ /usr/share/nginx/html
 
 EXPOSE 80
 
-CMD ["nginx","-g","daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]
