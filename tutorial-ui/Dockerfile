@@ -14,7 +14,7 @@ RUN npm run build -- --no-progress
 # Runtime Stage
 FROM nginx:alpine
 
-COPY --from=builder /app/dist/tutorial-ui/browser/ /usr/share/nginx/html
+COPY --from=builder /app/dist/tutorial-ui/ /usr/share/nginx/html
 
 EXPOSE 80
 
