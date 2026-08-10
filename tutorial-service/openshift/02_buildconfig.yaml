@@ -11,7 +11,7 @@ spec:
       uri: https://github.com/amir35/tutorial-system.git
       ref: feature/openshift
 
-    contextDir: tutorial-service
+    contextDir: tutorial-service        #PAth wehre Dockerfile is available in the repo
 
     type: Git
 
