@@ -3,8 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Tutorial } from '../models/tutorial.model';
 
-const baseUrl = 'http://localhost:8080/api/tutorials';
-// const baseUrl = 'http://tutorial.local/api/tutorials';
+const baseUrl = 'https://tutorial-service-amirahmad2204-dev.apps.rm3.7wse.p1.openshiftapps.com/api/tutorials';
 
 @Injectable({
   providedIn: 'root',

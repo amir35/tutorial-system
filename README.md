@@ -42,7 +42,7 @@ Here, PVC tutorial-system-pvc STATUS changed to BOUND.
 oc apply -f 06_service.yaml
 oc get service
 
-**Get applciation endpoint**
+**Get application endpoint**
 oc get endpoints tutorial-service
 NAME               ENDPOINTS           AGE
 tutorial-service   10.129.5.220:8080   42s
@@ -64,3 +64,12 @@ oc get imagestream
 oc apply -f 03_deployment.yaml
 oc get deployment
 oc get pods
+
+oc apply -f 04_service.yaml
+oc get service tutorial-ui
+oc get endpoints tutorial-ui
+NAME          ENDPOINTS           AGE
+tutorial-ui   10.128.4.216:8080   19s
+
+oc apply -f 05_route.yaml
+oc get route tutorial-ui
