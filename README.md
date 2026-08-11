@@ -73,3 +73,21 @@ tutorial-ui   10.128.4.216:8080   19s
 
 oc apply -f 05_route.yaml
 oc get route tutorial-ui
+
+**Command Sequence**
+git add .
+git commit -m "Use H2 database"
+git push
+
+oc apply -f configmap.yaml
+oc apply -f secret.yaml
+
+oc start-build tutorial-backend --follow
+
+oc rollout restart deployment tutorial-backend
+
+oc get pods
+
+oc logs -f deployment/tutorial-backend
+
+oc get route
