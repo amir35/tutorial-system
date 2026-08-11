@@ -1,0 +1,14 @@
+apiVersion: tekton.dev/v1
+kind: TaskRun
+
+metadata:
+  generateName: image-build-taskrun-
+
+spec:
+  taskRef:
+    name: image-build-task
+
+  workspaces:
+    - name: source
+      persistentVolumeClaim:
+        claimName: tekton-workspace-pvc

@@ -1,0 +1,68 @@
+apiVersion: tekton.dev/v1
+kind: Task
+
+metadata:
+  name: image-build-task
+
+spec:
+  workspaces:
+    - name: source
+
+  steps:
+
+    - name: build-image
+      image: quay.io/openshift/origin-cli:latest
+
+      workingDir: $(workspaces.source.path)/tutorial-service
+
+      script: |
+        #!/bin/sh
+        set -e
+
+        echo "======================================"
+        echo "Starting OpenShift Image Build"
+        echo "======================================"
+
+        echo "Working directory:"
+        pwd
+
+        echo ""
+        echo "Source files:"
+        ls -la
+
+        echo ""
+        echo "Target directory:"
+        ls -la target/
+
+        echo ""
+        echo "Logging into OpenShift..."
+
+        oc login \
+          --server=https://kubernetes.default.svc \
+          --token="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+          --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+
+        echo ""
+        echo "Current OpenShift project:"
+        oc project
+
+        echo ""
+        echo "======================================"
+        echo "Starting Binary Build"
+        echo "======================================"
+
+        oc start-build tutorial-service-tekton \
+          --from-dir="$(workspaces.source.path)/tutorial-service" \
+          --follow
+
+        echo ""
+        echo "======================================"
+        echo "Image Build Completed"
+        echo "======================================"
+
+        echo "ImageStream:"
+        oc get imagestream tutorial-service
+
+        echo ""
+        echo "ImageStream Tags:"
+        oc get istag tutorial-service:latest

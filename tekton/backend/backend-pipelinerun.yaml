@@ -1,0 +1,31 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+
+metadata:
+  generateName: backend-pipeline-run-
+
+spec:
+
+  pipelineRef:
+    name: backend-pipeline
+
+  params:
+    - name: repo-url
+      value: https://github.com/amir35/tutorial-system.git
+
+    - name: revision
+      value: feature/tekton
+
+  workspaces:
+    - name: shared-workspace
+
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+
+          storageClassName: gp3
+
+          resources:
+            requests:
+              storage: 1Gi
