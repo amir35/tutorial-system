@@ -1,0 +1,25 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+
+metadata:
+  name: tutorial-ui-tekton
+
+spec:
+
+  runPolicy: Serial
+
+  source:
+    type: Binary
+
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+
+  output:
+    to:
+      kind: ImageStreamTag
+      name: tutorial-ui:latest
+
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5

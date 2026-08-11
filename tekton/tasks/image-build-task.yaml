@@ -5,6 +5,12 @@ metadata:
   name: image-build-task
 
 spec:
+
+  params:
+
+    - name: APP_NAME
+      type: string
+
   workspaces:
     - name: source
 
@@ -13,26 +19,27 @@ spec:
     - name: build-image
       image: quay.io/openshift/origin-cli:latest
 
-      workingDir: $(workspaces.source.path)/tutorial-service
+      workingDir: $(workspaces.source.path)/$(params.APP_NAME)
 
       script: |
         #!/bin/sh
         set -e
 
-        echo "======================================"
+        echo "========================================"
         echo "Starting OpenShift Image Build"
-        echo "======================================"
+        echo "========================================"
 
+        echo ""
+        echo "Application:"
+        echo "$(params.APP_NAME)"
+
+        echo ""
         echo "Working directory:"
         pwd
 
         echo ""
         echo "Source files:"
         ls -la
-
-        echo ""
-        echo "Target directory:"
-        ls -la target/
 
         echo ""
         echo "Logging into OpenShift..."
@@ -47,22 +54,23 @@ spec:
         oc project
 
         echo ""
-        echo "======================================"
+        echo "========================================"
         echo "Starting Binary Build"
-        echo "======================================"
+        echo "========================================"
 
-        oc start-build tutorial-service-tekton \
-          --from-dir="$(workspaces.source.path)/tutorial-service" \
+        oc start-build $(params.APP_NAME)-tekton \
+          --from-dir="$(workspaces.source.path)/$(params.APP_NAME)" \
           --follow
 
         echo ""
-        echo "======================================"
+        echo "========================================"
         echo "Image Build Completed"
-        echo "======================================"
+        echo "========================================"
 
+        echo ""
         echo "ImageStream:"
-        oc get imagestream tutorial-service
+        oc get imagestream $(params.APP_NAME)
 
         echo ""
         echo "ImageStream Tags:"
-        oc get istag tutorial-service:latest
+        oc get istag $(params.APP_NAME):latest

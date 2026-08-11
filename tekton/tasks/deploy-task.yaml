@@ -6,6 +6,11 @@ metadata:
 
 spec:
 
+  params:
+
+    - name: APP_NAME
+      type: string
+
   steps:
 
     - name: deploy
@@ -15,9 +20,13 @@ spec:
         #!/bin/sh
         set -e
 
-        echo "======================================"
+        echo "========================================"
         echo "Starting Deployment"
-        echo "======================================"
+        echo "========================================"
+
+        echo ""
+        echo "Application:"
+        echo "$(params.APP_NAME)"
 
         echo ""
         echo "Current project:"
@@ -25,30 +34,30 @@ spec:
 
         echo ""
         echo "Current image:"
-        oc get deployment tutorial-service \
+        oc get deployment $(params.APP_NAME) \
           -o jsonpath='{.spec.template.spec.containers[0].image}'
 
         echo ""
         echo ""
-        echo "Restarting tutorial-service deployment..."
+        echo "Restarting $(params.APP_NAME) deployment..."
 
-        oc rollout restart deployment/tutorial-service
+        oc rollout restart deployment/$(params.APP_NAME)
 
         echo ""
         echo "Waiting for rollout..."
 
-        oc rollout status deployment/tutorial-service \
+        oc rollout status deployment/$(params.APP_NAME) \
           --timeout=300s
 
         echo ""
-        echo "======================================"
+        echo "========================================"
         echo "Deployment Successful"
-        echo "======================================"
+        echo "========================================"
 
         echo ""
         echo "Deployment:"
-        oc get deployment tutorial-service
+        oc get deployment $(params.APP_NAME)
 
         echo ""
         echo "Pods:"
-        oc get pods -l app=tutorial-service
+        oc get pods -l app=$(params.APP_NAME)

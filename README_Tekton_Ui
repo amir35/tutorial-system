@@ -1,0 +1,102 @@
+**CONTINUOS INTEGRATION USING TEKTON**
+
+Step 1 - Make "image-build-task.yaml" generic
+Currently it is hardcoded for tutorial-service. Now , Let's change the Task so it accepts an APP_NAME parameter.
+
+Add: params:
+       - name: APP_NAME
+         type: string
+
+workingDir: $(workspaces.source.path)/tutorial-service -> workingDir: $(workspaces.source.path)/$(params.APP_NAME)
+
+oc start-build tutorial-service-tekton \                            oc start-build $(params.APP_NAME)-tekton \
+  --from-dir="$(workspaces.source.path)/tutorial-service" \  ->     --from-dir="$(workspaces.source.path)/$(params.APP_NAME)" \
+  --follow                                                           --follow
+
+oc get imagestream tutorial-service  -> oc get imagestream $(params.APP_NAME)
+oc get istag tutorial-service:latest -> oc get istag $(params.APP_NAME):latest
+
+For backend:
+APP_NAME = tutorial-service
+
+For UI:
+APP_NAME = tutorial-ui
+
+Step 2 — Apply the modified Task
+oc apply -f tasks\image-build-task.yaml
+Expected: task.tekton.dev/image-build-task configured
+
+oc get task image-build-task -o yaml
+
+Step 3 — Create tutorial-ui-tekton BuildConfig
+
+Apply: oc apply -f ui\tutorial-ui-tekton-buildconfig.yaml
+Expected: buildconfig.build.openshift.io/tutorial-ui-tekton created
+
+oc get buildconfig tutorial-ui-tekton
+NAME                 TYPE     FROM     LATEST
+tutorial-ui-tekton   Docker   Binary   0
+
+Step 4 — One more change to deploy-task
+
+Add: params:
+         - name: APP_NAME
+           type: string
+
+oc get deployment tutorial-service -> oc get deployment $(params.APP_NAME)
+oc rollout restart deployment/tutorial-service -> oc rollout restart deployment/$(params.APP_NAME)
+
+Step 5 — Apply deploy Task
+oc apply -f tasks\deploy-task.yaml
+Expected: task.tekton.dev/deploy-task configured
+
+oc get tasks
+NAME               AGE
+deploy-task        138m
+git-clone-task     4h52m
+image-build-task   3h7m
+maven-build-task   4h36m
+
+Step 6 — Now create the UI pipeline "ui-pipeline.yaml"
+
+Apply: oc apply -f ui\ui-pipeline.yaml
+Expected: pipeline.tekton.dev/ui-pipeline created
+
+oc get pipeline.tekton.dev
+NAME               AGE
+backend-pipeline   4h26m
+ui-pipeline        29s
+
+Step 7 - Create the UI pipelinerun "ui-pipelinerun.yaml"
+
+Create: oc create -f ui\ui-pipelinerun.yaml
+Expected: pipelinerun.tekton.dev/ui-pipeline-run-p8bkd created
+
+oc get pipelinerun.tekton.dev
+NAME                         SUCCEEDED   REASON      STARTTIME   COMPLETIONTIME
+ui-pipeline-run-p8bkd        False       Failed      36s         24s
+
+fatal: destination path '/workspace/source' already exists and is not an empty directory.
+
+oc create -f ui\ui-pipelinerun.yaml
+Expected: pipelinerun.tekton.dev/ui-pipeline-run-tdxxp created
+
+oc get pipelinerun.tekton.dev
+NAME                         SUCCEEDED   REASON      STARTTIME   COMPLETIONTIME
+ui-pipeline-run-tdxxp        Unknown     Running     48s
+
+NAME                         SUCCEEDED   REASON      STARTTIME   COMPLETIONTIME
+ui-pipeline-run-tdxxp        True        Succeeded   10m         88s
+
+oc get taskrun
+NAME                                          SUCCEEDED   REASON       STARTTIME   COMPLETIONTIME
+ui-pipeline-run-tdxxp-clone-repository        True        Succeeded    10m         10m
+ui-pipeline-run-tdxxp-deploy                  True        Succeeded    2m2s        114s
+ui-pipeline-run-tdxxp-image-build             True        Succeeded    10m         2m2s
+
+oc gets pods
+NAME                                              READY   STATUS      RESTARTS   AGE
+tutorial-ui-tekton-1-build                        0/1     Completed   0          10m
+ui-pipeline-run-tdxxp-clone-repository-pod        0/1     Completed   0          11m
+ui-pipeline-run-tdxxp-deploy-pod                  0/1     Completed   0          2m38s
+ui-pipeline-run-tdxxp-image-build-pod             0/1     Completed   0          11m
