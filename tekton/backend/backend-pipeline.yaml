@@ -1,0 +1,93 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+
+metadata:
+  name: backend-pipeline
+
+spec:
+
+  params:
+
+    - name: repo-url
+      type: string
+
+    - name: revision
+      type: string
+      default: main
+
+  workspaces:
+
+    - name: shared-workspace
+
+  tasks:
+
+    # ==========================================
+    # 1. Git Clone
+    # ==========================================
+
+    - name: clone-repository
+
+      taskRef:
+        name: git-clone-task
+
+      params:
+
+        - name: repo-url
+          value: $(params.repo-url)
+
+        - name: revision
+          value: $(params.revision)
+
+      workspaces:
+
+        - name: source
+          workspace: shared-workspace
+
+
+    # ==========================================
+    # 2. Maven Build
+    # ==========================================
+
+    - name: maven-build
+
+      runAfter:
+        - clone-repository
+
+      taskRef:
+        name: maven-build-task
+
+      workspaces:
+
+        - name: source
+          workspace: shared-workspace
+
+
+    # ==========================================
+    # 3. Image Build
+    # ==========================================
+
+    - name: image-build
+
+      runAfter:
+        - maven-build
+
+      taskRef:
+        name: image-build-task
+
+      workspaces:
+
+        - name: source
+          workspace: shared-workspace
+
+
+    # ==========================================
+    # 4. Deploy
+    # ==========================================
+
+    - name: deploy
+
+      runAfter:
+        - image-build
+
+      taskRef:
+        name: deploy-task
