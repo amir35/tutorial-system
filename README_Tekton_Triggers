@@ -154,3 +154,99 @@ Active: Mark as Active
 Then we clicked "Add webhook".
 
 
+                                                GITHUB
+                                                   │
+                                                   │ POST Webhook
+                                                   │
+                                                   ▼
+                                          ┌─────────────────┐
+                                          │  EventListener  │
+                                          │                 │
+                                          │ ui-eventlistener│
+                                          └────────┬────────┘
+                                                   │
+                                                   ▼
+                                             ┌───────────┐
+                                             │  Trigger  │
+                                             │ ui-trigger│
+                                             └─────┬─────┘
+                                                   │
+                                          ┌────────┴────────┐
+                                          │                 │
+                                          ▼                 ▼
+                                   TriggerBinding     TriggerTemplate
+                                          │                 │
+                                          │                 │
+                                   Extract data        Create resource
+                                          │                 │
+                                          ▼                 │
+                                     repo-url               │
+                                     revision               │
+                                          │                 │
+                                          └────────┬────────┘
+                                                   │
+                                                   ▼
+                                             ┌────────────┐
+                                             │ PipelineRun│
+                                             └─────┬──────┘
+                                                   │
+                                                   ▼
+                                              ui-pipeline
+                                                   │
+                                          ┌────────┼─────────┐
+                                          ▼        ▼         ▼
+                                        clone    image      deploy
+                                                 build
+
+Component	        Simple meaning
+EventListener	    Receives the Webhook
+Trigger	            Event processing ko connect/orchestrate karta hai
+TriggerBinding	    Webhook JSON se values extract karta hai
+TriggerTemplate	    Extracted values ke saath PipelineRun create karta hai
+
+Final Flow:
+
+                                                Developer
+                                                    │
+                                                 git push
+                                                    │
+                                                    ▼
+                                                 GitHub
+                                                    │
+                                              push webhook
+                                                    │
+                                                    ▼
+                                        ┌─────────────────────┐
+                                        │    OpenShift Route  │
+                                        └──────────┬──────────┘
+                                                   │
+                                                   ▼
+                                        ┌─────────────────────┐
+                                        │     EventListener   │
+                                        └──────────┬──────────┘
+                                                   │
+                                                   ▼
+                                                Trigger
+                                                   │
+                                                   ▼
+                                            TriggerBinding
+                                                   │
+                                                   ▼
+                                            TriggerTemplate
+                                                   │
+                                                   ▼
+                                              PipelineRun
+                                                   │
+                                        ┌──────────┼──────────┐
+                                        ▼          ▼          ▼
+                                      Clone      Build      Deploy
+                                       ✅         ✅          ✅
+                                                   │
+                                                   ▼
+                                              ImageStream
+                                                   │
+                                                   ▼
+                                             Deployment
+                                                   │
+                                                   ▼
+                                                  Pod
