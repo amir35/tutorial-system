@@ -15,7 +15,7 @@ spec:
       value: https://github.com/amir35/tutorial-system.git
 
     - name: revision
-      value: feature/openshift
+      value: feature/tekton
 
   workspaces:
 
