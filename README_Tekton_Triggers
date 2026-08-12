@@ -1,0 +1,156 @@
+Step 1 — Create the TriggerBinding "ui-triggerbinding.yaml"
+
+Apply: oc apply -f ui\ui-triggerbinding.yaml
+Expected: triggerbinding.triggers.tekton.dev/ui-triggerbinding created
+
+oc get triggerbinding
+NAME                AGE
+ui-triggerbinding   19s
+
+Step 2 — Create ui-triggertemplate.yaml
+The TriggerTemplate's job is:
+Take the values from TriggerBinding and create a new PipelineRun.
+
+So our flow becomes:
+        GitHub webhook
+              ↓
+        TriggerBinding
+              ↓
+        repo-url + revision
+              ↓
+        TriggerTemplate
+              ↓
+        ui-pipeline-run-xxxxx
+              ↓
+        clone → image-build → deploy
+
+Apply: oc apply -f ui\ui-triggertemplate.yaml
+Expected: triggertemplate.triggers.tekton.dev/ui-triggertemplate created
+
+oc get triggertemplate
+NAME                 AGE
+ui-triggertemplate   25s
+
+Step 3 — Create ui-trigger.yaml
+Trigger ka kaam hai Binding aur Template ko connect karna:
+
+Apply: oc apply -f ui\ui-trigger.yaml
+Expected: trigger.triggers.tekton.dev/ui-trigger created
+
+oc get tri
+NAME         AGE
+ui-trigger   3m6s
+
+Step 4 — Create the EventListener "ui-eventlistener.yaml"
+
+The EventListener says:
+"When an HTTP event comes to me, send it to ui-triggerbinding and ui-triggertemplate."
+
+So,
+                GitHub
+                   │
+                   │ HTTP POST
+                   ▼
+                ui-eventlistener
+                   │
+                   ▼
+                ui-triggerbinding
+                   │
+                   ▼
+                ui-triggertemplate
+                   │
+                   ▼
+                PipelineRun
+
+Apply: oc apply -f ui\ui-eventlistener.yaml
+Expected: eventlistener.triggers.tekton.dev/ui-eventlistener created
+
+oc get eventlisteners
+NAME               ADDRESS                                                               AVAILABLE   REASON                     READY   REASON
+ui-eventlistener   http://el-ui-eventlistener.amirahmad2204-dev.svc.cluster.local:8080   True        MinimumReplicasAvailable   True
+
+oc get pods
+NAME                                              READY   STATUS      RESTARTS   AGE
+el-ui-eventlistener-fd5668bc5-bvb66               1/1     Running     0          40s
+
+oc get svc | Select-String eventlistener
+el-ui-eventlistener   ClusterIP   172.30.163.118   <none>        8080/TCP,9000/TCP                     3m58s
+
+Step 5 - Create the Route "ui-eventlistener-route.yaml"
+
+Apply: oc apply -f ui\ui-eventlistener-route.yaml
+Expected: route.route.openshift.io/ui-eventlistener created
+
+oc get route ui-eventlistener
+NAME               HOST/PORT                                                               PATH   SERVICES              PORT   TERMINATION   WILDCARD
+ui-eventlistener   ui-eventlistener-amirahmad2204-dev.apps.rm3.7wse.p1.openshiftapps.com          el-ui-eventlistener   8080   edge          None
+
+Get the exact URL
+oc get route ui-eventlistener -o jsonpath='{.spec.host}'
+Expected: ui-eventlistener-amirahmad2204-dev.apps.rm3.7wse.p1.openshiftapps.com
+
+Then the webhook URL will be:
+https://ui-eventlistener-amirahmad2204-dev.apps.rm3.7wse.p1.openshiftapps.com
+This is the URL to which GitHub will eventually send the webhook.
+
+Step 6 - First Test — Send a POST Request
+Before configuring GitHub, we manually tested the EventListener.
+
+curl.exe -i -X POST "https://ui-eventlistener-amirahmad2204-dev.apps.rm3.7wse.p1.openshiftapps.com" `
+-H "Content-Type: application/json" `
+-d '{"ref":"refs/heads/feature/openshift","repository":{"clone_url":"https://github.com/amir35/tutorial-system.git"}}'
+
+We got: HTTP/1.1 400 Bad Request
+with: Invalid event body format
+
+Step 7 - Create JSON Body Properly in PowerShell
+Instead of directly putting the JSON into curl, we created a PowerShell object:
+
+$body = @{
+    ref = "refs/heads/feature/openshift"
+    repository = @{
+        clone_url = "https://github.com/amir35/tutorial-system.git"
+    }
+} | ConvertTo-Json -Compress
+
+$body
+Expected: {"ref":"refs/heads/feature/openshift","repository":{"clone_url":"https://github.com/amir35/tutorial-system.git"}}
+
+Also, our git-clone-task.yaml was receiving branch name as refs/heads/feature/openshift.
+So, we updated it to remove refs/heads/.
+
+oc apply -f tasks\git-clone-task.yaml
+Expected: task.tekton.dev/git-clone-task configured
+
+Step 8 - We again sent the request using Invoke-RestMethod Instead
+Invoke-RestMethod `
+    -Uri "https://ui-eventlistener-amirahmad2204-dev.apps.rm3.7wse.p1.openshiftapps.com" `
+    -Method POST `
+    -ContentType "application/json" `
+    -Body $body
+
+Output:
+eventListener    namespace         eventListenerUID                     eventID
+-------------    ---------         ----------------                     -------
+ui-eventlistener amirahmad2204-dev 9c41d354-8204-4469-935f-17e0860005ea 622afa89-e103-404e-8507-86e7ee654130
+
+Step 9 - EventListener Created a PipelineRun
+After sending the POST request, we checked:
+
+oc get pipelinerun
+NAME                         SUCCEEDED   REASON      STARTTIME   COMPLETIONTIME
+ui-pipeline-run-cwxvd        Unknown     Running     31s
+
+This was important because we did not manually create this PipelineRun.
+The EventListener/Trigger created it automatically.
+
+Step 10 - Add webhook to GitHub Repository
+We went to our GitHub repository, then Settings → Webhooks → Add webhook.
+Payload URL: https://ui-eventlistener-amirahmad2204-dev.apps.rm3.7wse.p1.openshiftapps.com
+Content type: application/json
+Secret: (we left it empty)
+Events: Just the push event.
+Active: Mark as Active
+Then we clicked "Add webhook".
+
+

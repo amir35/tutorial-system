@@ -1,0 +1,16 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+
+metadata:
+  name: ui-eventlistener
+
+spec:
+  to:
+    kind: Service
+    name: el-ui-eventlistener
+
+  port:
+    targetPort: 8080
+
+  tls:
+    termination: edge

@@ -12,10 +12,12 @@ export class TutorialService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Tutorial[]> {
+    console.log('Fetching all tutorials from:', baseUrl);
     return this.http.get<Tutorial[]>(baseUrl);
   }
 
   get(id: any): Observable<Tutorial> {
+    console.log('Fetching tutorial with ID:', id);
     return this.http.get<Tutorial>(`${baseUrl}/${id}`);
   }
 

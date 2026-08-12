@@ -32,16 +32,30 @@ spec:
 
         echo "Revision:"
         echo "$(params.revision)"
-
+  
         echo "Workspace:"
         echo "$(workspaces.source.path)"
+  
+        echo "========================================"
+  
+        # Convert Git ref to branch name if required
+        REVISION="$(params.revision)"
 
-        echo "======================================"
-
+        case "$REVISION" in
+          refs/heads/*)
+            REVISION="${REVISION#refs/heads/}"
+            ;;
+        esac
+  
+        echo "Effective branch:"
+        echo "$REVISION"
+  
+        echo "========================================"
+  
         rm -rf "$(workspaces.source.path)"/*
-
+  
         git clone \
-          --branch "$(params.revision)" \
+          --branch "$REVISION" \
           "$(params.repo-url)" \
           "$(workspaces.source.path)"
 

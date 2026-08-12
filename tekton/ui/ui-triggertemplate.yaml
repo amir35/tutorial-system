@@ -1,0 +1,45 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+
+metadata:
+  name: ui-triggertemplate
+
+spec:
+  params:
+
+    - name: repo-url
+      description: Git repository URL
+
+    - name: revision
+      description: Git branch/revision
+
+  resourcetemplates:
+
+    - apiVersion: tekton.dev/v1
+      kind: PipelineRun
+
+      metadata:
+        generateName: ui-pipeline-run-
+
+      spec:
+        pipelineRef:
+          name: ui-pipeline
+
+        params:
+
+          - name: repo-url
+            value: $(tt.params.repo-url)
+
+          - name: revision
+            value: $(tt.params.revision)
+
+        workspaces:
+
+          - name: shared-workspace
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 1Gi

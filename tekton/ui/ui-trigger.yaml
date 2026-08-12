@@ -1,0 +1,12 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: Trigger
+
+metadata:
+  name: ui-trigger
+
+spec:
+  bindings:
+    - ref: ui-triggerbinding
+
+  template:
+    ref: ui-triggertemplate

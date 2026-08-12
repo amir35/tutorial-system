@@ -1,0 +1,18 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+
+metadata:
+  name: ui-eventlistener
+
+spec:
+
+  triggers:
+
+    - name: github-ui-trigger
+
+      bindings:
+
+        - ref: ui-triggerbinding
+
+      template:
+        ref: ui-triggertemplate
