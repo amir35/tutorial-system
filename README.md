@@ -9,7 +9,7 @@ This is tutorial frontend ui written in Angular.
 spring.datasource.url=jdbc:oracle:thin:@host.docker.internal:1521/orcl
 
 **angular.json**
-Check "outputPath": "dist/tutorial-front-end" for DockerImage build copy
+Check "outputPath": "dist/tutorial-ui" for DockerImage build copy
 
 **Tutorial Service - Build the image**
 docker build -t amirdocker2204/tutorial-service:v1 .
